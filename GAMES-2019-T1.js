@@ -895,9 +895,9 @@ ApplicationMain.create = function(config) {
 	ManifestResources.init(config);
 	var _this = app.meta;
 	if(__map_reserved["build"] != null) {
-		_this.setReserved("build","8");
+		_this.setReserved("build","15");
 	} else {
-		_this.h["build"] = "8";
+		_this.h["build"] = "15";
 	}
 	var _this1 = app.meta;
 	if(__map_reserved["company"] != null) {
@@ -7639,22 +7639,40 @@ EReg.prototype = {
 	}
 	,__class__: EReg
 };
-var Enemy = function(w,h,c) {
+var Enemy = function(w,h,c,p) {
 	flixel_FlxSprite.call(this);
 	this.makeGraphic(w,h,c);
 	this.health = 10;
+	this.mass = 5;
+	this.maxVelocity.set(100,100);
+	this._thePlayer = p;
 };
 $hxClasses["Enemy"] = Enemy;
 Enemy.__name__ = ["Enemy"];
 Enemy.__super__ = flixel_FlxSprite;
 Enemy.prototype = $extend(flixel_FlxSprite.prototype,{
-	update: function(elapsed) {
-		this.velocity.set(0,99);
+	_thePlayer: null
+	,update: function(elapsed) {
+		this.seek(elapsed);
 		flixel_FlxSprite.prototype.update.call(this,elapsed);
 	}
+	,seek: function(elapsed) {
+		var this1 = new flixel_math_FlxPoint(0,0);
+		var steering = this1;
+		var this2 = new flixel_math_FlxPoint(0,0);
+		var dv = this2;
+		dv.set_x(this._thePlayer.x - this.x);
+		dv.set_y(this._thePlayer.y - this.y);
+		flixel_math__$FlxVector_FlxVector_$Impl_$.normalize(dv).scale(100);
+		steering.set_x(dv.x - this.velocity.x);
+		steering.set_y(dv.y - this.velocity.y);
+		this.acceleration.set_x(steering.x);
+		this.acceleration.set_y(steering.y);
+	}
 	,onMessage: function(m) {
-		var _this = flixel_FlxG.log;
-		var Data = "Enemy msg, op = " + m.op;
+		if(m.op == 0) {
+			this.hurt(m.data);
+		}
 	}
 	,__class__: Enemy
 });
@@ -8247,19 +8265,19 @@ PlayState.prototype = $extend(flixel_FlxState.prototype,{
 		this._enemies = new flixel_group_FlxTypedGroup();
 		this._player = new Player();
 		var _g = 0;
-		while(_g < 30) {
+		while(_g < 10) {
 			var i = _g++;
-			var s = new Enemy(30,15,-1);
-			s.kill();
-			this._enemies.add(s);
+			var e = new Enemy(30,15,-1,this._player);
+			e.kill();
+			this._enemies.add(e);
 		}
 		var _g1 = 0;
 		while(_g1 < 30) {
 			var i1 = _g1++;
-			var s1 = new Bullet();
-			s1.angularAcceleration = 100;
-			s1.kill();
-			this._bullets.add(s1);
+			var s = new Bullet();
+			s.angularAcceleration = 100;
+			s.kill();
+			this._bullets.add(s);
 		}
 		this._player.set_x(flixel_FlxG.width / 2 - this._player.get_width() / 2);
 		this._player.set_y(flixel_FlxG.height - this._player.get_height() + 2);
@@ -8284,7 +8302,26 @@ PlayState.prototype = $extend(flixel_FlxState.prototype,{
 				b.velocity.set_y(this._velocity.y);
 			}
 		}
-		var tmp = this._timer > 5;
+		if(this._timer > 5) {
+			var e = this._enemies.getFirstAvailable();
+			if(e != null) {
+				var side = flixel_FlxG.random["int"](0,4);
+				var x = flixel_FlxG.random["int"](0,flixel_FlxG.width);
+				var y = flixel_FlxG.random["int"](0,flixel_FlxG.height);
+				if(side == 0) {
+					e.reset(0 - e.get_width(),y);
+				} else if(side == 1) {
+					e.reset(x,flixel_FlxG.height - e.get_height());
+				} else if(side == 2) {
+					e.reset(flixel_FlxG.width + e.get_width(),y);
+				} else if(side == 3) {
+					e.reset(x,flixel_FlxG.height + e.get_height());
+				}
+				e.health = 10;
+			}
+			this._timer = 0;
+		}
+		flixel_FlxG.overlap(this._bullets,this._enemies,$bind(this,this.onOverlap));
 		flixel_FlxG.overlap(this._player,this._enemies,null,flixel_FlxObject.separate);
 		var _this1 = flixel_FlxG.keys.pressed;
 		if(_this1.keyManager.checkStatus(27,_this1.status)) {
@@ -8295,20 +8332,29 @@ PlayState.prototype = $extend(flixel_FlxState.prototype,{
 		}
 		flixel_FlxState.prototype.update.call(this,elapsed);
 	}
+	,onOverlap: function(a,b) {
+		a.kill();
+		var m = new Message();
+		m.from = a;
+		m.to = b;
+		m.op = 0;
+		m.data = 1;
+		this._mail.send(m);
+	}
 	,__class__: PlayState
 });
 var Player = function() {
-	this.runSpeed = 100;
+	this._maxSpeed = 100;
 	flixel_FlxSprite.call(this);
 	this.makeGraphic(20,20,-16776961);
-	this.maxVelocity.set_x(this.runSpeed);
-	this.maxVelocity.set_y(this.runSpeed);
+	this.maxVelocity.set_x(this._maxSpeed);
+	this.maxVelocity.set_y(this._maxSpeed);
 };
 $hxClasses["Player"] = Player;
 Player.__name__ = ["Player"];
 Player.__super__ = flixel_FlxSprite;
 Player.prototype = $extend(flixel_FlxSprite.prototype,{
-	runSpeed: null
+	_maxSpeed: null
 	,update: function(elapsed) {
 		this.velocity.set_x(0);
 		this.velocity.set_y(0);
@@ -8317,16 +8363,16 @@ Player.prototype = $extend(flixel_FlxSprite.prototype,{
 	}
 	,updateInput: function() {
 		if(flixel_FlxG.keys.checkKeyArrayState([65,37],1)) {
-			this.velocity.set_x(-this.runSpeed);
+			this.velocity.set_x(-this._maxSpeed);
 		}
 		if(flixel_FlxG.keys.checkKeyArrayState([68,39],1)) {
-			this.velocity.set_x(this.runSpeed);
+			this.velocity.set_x(this._maxSpeed);
 		}
 		if(flixel_FlxG.keys.checkKeyArrayState([87,38],1)) {
-			this.velocity.set_y(-this.runSpeed);
+			this.velocity.set_y(-this._maxSpeed);
 		}
 		if(flixel_FlxG.keys.checkKeyArrayState([83,40],1)) {
-			this.velocity.set_y(this.runSpeed);
+			this.velocity.set_y(this._maxSpeed);
 		}
 	}
 	,onMessage: function(m) {
@@ -69153,7 +69199,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 672266;
+	this.version = 817095;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = ["lime","utils","AssetCache"];
@@ -114060,8 +114106,8 @@ flixel_FlxObject._secondSeparateFlxRect = (function($this) {
 }(this));
 openfl_text_Font.__fontByName = new haxe_ds_StringMap();
 openfl_text_Font.__registeredFonts = [];
-Message.OP_DANO = 0;
-Message.OP_CURA = 1;
+Message.OP_DAMAGE = 0;
+Message.OP_HEAL = 1;
 Xml.Element = 0;
 Xml.PCData = 1;
 Xml.CData = 2;
