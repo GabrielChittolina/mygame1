@@ -895,9 +895,9 @@ ApplicationMain.create = function(config) {
 	ManifestResources.init(config);
 	var _this = app.meta;
 	if(__map_reserved["build"] != null) {
-		_this.setReserved("build","15");
+		_this.setReserved("build","17");
 	} else {
-		_this.h["build"] = "15";
+		_this.h["build"] = "17";
 	}
 	var _this1 = app.meta;
 	if(__map_reserved["company"] != null) {
@@ -4547,7 +4547,7 @@ openfl_display_Sprite.prototype = $extend(openfl_display_DisplayObjectContainer.
 });
 var Main = function() {
 	openfl_display_Sprite.call(this);
-	this.addChild(new flixel_FlxGame(320,240,PlayState));
+	this.addChild(new flixel_FlxGame(320,240,MenuState));
 };
 $hxClasses["Main"] = Main;
 Main.__name__ = ["Main"];
@@ -4566,6 +4566,9 @@ DocumentClass.__super__ = Main;
 DocumentClass.prototype = $extend(Main.prototype,{
 	__class__: DocumentClass
 });
+var AssetPaths = function() { };
+$hxClasses["AssetPaths"] = AssetPaths;
+AssetPaths.__name__ = ["AssetPaths"];
 var flixel_util_IFlxDestroyable = function() { };
 $hxClasses["flixel.util.IFlxDestroyable"] = flixel_util_IFlxDestroyable;
 flixel_util_IFlxDestroyable.__name__ = ["flixel","util","IFlxDestroyable"];
@@ -7502,7 +7505,7 @@ CreditsState.prototype = $extend(flixel_FlxState.prototype,{
 		this._textoArte.set_moves(true);
 		this._textoArte.velocity.set_y(-25);
 		this._contentArte = new flixel_text_FlxText(0,0,0,"",12);
-		this._contentArte.set_text("TO DO");
+		this._contentArte.set_text("Zombies: \nOriginal Author: \nrileygombart \nDisponível em: \nhttps://opengameart.org/content/ \ntop-down-animated-zombie-set");
 		this._contentArte.set_x(flixel_FlxG.width / 2 - this._contentArte.get_width() / 2);
 		this._contentArte.set_y(this._textoArte.y + this._textoArte.get_height());
 		this._contentArte.set_alignment("center");
@@ -7641,9 +7644,13 @@ EReg.prototype = {
 };
 var Enemy = function(w,h,c,p) {
 	flixel_FlxSprite.call(this);
-	this.makeGraphic(w,h,c);
+	this.loadGraphic("assets/images/running_zombie.png",true,104,32);
+	this._facingFlip.set(1,{ x : true, y : false});
+	this._facingFlip.set(16,{ x : false, y : false});
+	this.scale.set(0.5,0.5);
+	this.updateHitbox();
+	this.animation.add("walk",[0,1,2,3,4,5,6,7,8,9,10],8);
 	this.health = 10;
-	this.mass = 5;
 	this.maxVelocity.set(100,100);
 	this._thePlayer = p;
 };
@@ -7654,6 +7661,7 @@ Enemy.prototype = $extend(flixel_FlxSprite.prototype,{
 	_thePlayer: null
 	,update: function(elapsed) {
 		this.seek(elapsed);
+		this.animation.play("walk");
 		flixel_FlxSprite.prototype.update.call(this,elapsed);
 	}
 	,seek: function(elapsed) {
@@ -7664,6 +7672,7 @@ Enemy.prototype = $extend(flixel_FlxSprite.prototype,{
 		dv.set_x(this._thePlayer.x - this.x);
 		dv.set_y(this._thePlayer.y - this.y);
 		flixel_math__$FlxVector_FlxVector_$Impl_$.normalize(dv).scale(100);
+		this.set_angle(Math.atan2(this._thePlayer.x - this.x,this._thePlayer.y - this.y) * 180 / Math.PI);
 		steering.set_x(dv.x - this.velocity.x);
 		steering.set_y(dv.y - this.velocity.y);
 		this.acceleration.set_x(steering.x);
@@ -7840,7 +7849,7 @@ ManifestResources.init = function(config) {
 	var data;
 	var manifest;
 	var library;
-	data = "{\"name\":null,\"assets\":\"aoy4:pathy34:assets%2Fdata%2Fdata-goes-here.txty4:sizezy4:typey4:TEXTy2:idR1y7:preloadtgoR0y36:assets%2Fmusic%2Fmusic-goes-here.txtR2zR3R4R5R7R6tgoR0y36:assets%2Fimages%2Fimages-go-here.txtR2zR3R4R5R8R6tgoR0y36:assets%2Fsounds%2Fsounds-go-here.txtR2zR3R4R5R9R6tgoR2i39706R3y5:MUSICR5y28:flixel%2Fsounds%2Fflixel.mp3y9:pathGroupaR11y28:flixel%2Fsounds%2Fflixel.ogghR6tgoR2i2114R3R10R5y26:flixel%2Fsounds%2Fbeep.mp3R12aR14y26:flixel%2Fsounds%2Fbeep.ogghR6tgoR2i33629R3y5:SOUNDR5R13R12aR11R13hgoR2i5794R3R16R5R15R12aR14R15hgoR2i15744R3y4:FONTy9:classNamey35:__ASSET__flixel_fonts_nokiafc22_ttfR5y30:flixel%2Ffonts%2Fnokiafc22.ttfR6tgoR2i29724R3R17R18y36:__ASSET__flixel_fonts_monsterrat_ttfR5y31:flixel%2Ffonts%2Fmonsterrat.ttfR6tgoR0y33:flixel%2Fimages%2Fui%2Fbutton.pngR2i519R3y5:IMAGER5R23R6tgoR0y36:flixel%2Fimages%2Flogo%2Fdefault.pngR2i3280R3R24R5R25R6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
+	data = "{\"name\":null,\"assets\":\"aoy4:pathy36:assets%2Fmusic%2Fmusic-goes-here.txty4:sizezy4:typey4:TEXTy2:idR1y7:preloadtgoR0y34:assets%2Fdata%2Fdata-goes-here.txtR2zR3R4R5R7R6tgoR0y36:assets%2Fsounds%2Fsounds-go-here.txtR2zR3R4R5R8R6tgoR0y36:assets%2Fimages%2Fimages-go-here.txtR2zR3R4R5R9R6tgoR0y36:assets%2Fimages%2Frunning_zombie.pngR2i37673R3y5:IMAGER5R10R6tgoR2i2114R3y5:MUSICR5y26:flixel%2Fsounds%2Fbeep.mp3y9:pathGroupaR13y26:flixel%2Fsounds%2Fbeep.ogghR6tgoR2i39706R3R12R5y28:flixel%2Fsounds%2Fflixel.mp3R14aR16y28:flixel%2Fsounds%2Fflixel.ogghR6tgoR2i33629R3y5:SOUNDR5R17R14aR16R17hgoR2i5794R3R18R5R15R14aR13R15hgoR2i15744R3y4:FONTy9:classNamey35:__ASSET__flixel_fonts_nokiafc22_ttfR5y30:flixel%2Ffonts%2Fnokiafc22.ttfR6tgoR2i29724R3R19R20y36:__ASSET__flixel_fonts_monsterrat_ttfR5y31:flixel%2Ffonts%2Fmonsterrat.ttfR6tgoR0y33:flixel%2Fimages%2Fui%2Fbutton.pngR2i519R3R11R5R25R6tgoR0y36:flixel%2Fimages%2Flogo%2Fdefault.pngR2i3280R3R11R5R26R6tgh\",\"rootPath\":null,\"version\":2,\"libraryArgs\":[],\"libraryType\":null}";
 	manifest = lime_utils_AssetManifest.parse(data,ManifestResources.rootPath);
 	library = lime_utils_AssetLibrary.fromManifest(manifest);
 	lime_utils_Assets.registerLibrary("default",library);
@@ -8302,7 +8311,7 @@ PlayState.prototype = $extend(flixel_FlxState.prototype,{
 				b.velocity.set_y(this._velocity.y);
 			}
 		}
-		if(this._timer > 5) {
+		if(this._timer > 3) {
 			var e = this._enemies.getFirstAvailable();
 			if(e != null) {
 				var side = flixel_FlxG.random["int"](0,4);
@@ -69199,7 +69208,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 817095;
+	this.version = 299305;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = ["lime","utils","AssetCache"];
@@ -114068,6 +114077,11 @@ openfl_display_DisplayObject.__tempStack = new lime_utils_ObjectPool(function() 
 },function(stack) {
 	stack.set_length(0);
 });
+AssetPaths.music_goes_here__txt = "assets/music/music-goes-here.txt";
+AssetPaths.data_goes_here__txt = "assets/data/data-goes-here.txt";
+AssetPaths.sounds_go_here__txt = "assets/sounds/sounds-go-here.txt";
+AssetPaths.images_go_here__txt = "assets/images/images-go-here.txt";
+AssetPaths.running_zombie__png = "assets/images/running_zombie.png";
 flixel_math_FlxRect._pool = new flixel_util_FlxPool_$flixel_$math_$FlxRect(flixel_math_FlxRect);
 flixel_FlxObject.defaultPixelPerfectPosition = false;
 flixel_FlxObject.SEPARATE_BIAS = 4;
