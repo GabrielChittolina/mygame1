@@ -895,9 +895,9 @@ ApplicationMain.create = function(config) {
 	ManifestResources.init(config);
 	var _this = app.meta;
 	if(__map_reserved["build"] != null) {
-		_this.setReserved("build","17");
+		_this.setReserved("build","18");
 	} else {
-		_this.h["build"] = "17";
+		_this.h["build"] = "18";
 	}
 	var _this1 = app.meta;
 	if(__map_reserved["company"] != null) {
@@ -8298,8 +8298,7 @@ PlayState.prototype = $extend(flixel_FlxState.prototype,{
 	}
 	,update: function(elapsed) {
 		this._timer += elapsed;
-		var _this = flixel_FlxG.mouse._leftButton;
-		if(_this.current == 1 || _this.current == 2) {
+		if(flixel_FlxG.mouse._leftButton.current == 2) {
 			var b = this._bullets.getFirstAvailable();
 			this._velocity.set_x(flixel_FlxG.mouse.x - this._player.x);
 			this._velocity.set_y(flixel_FlxG.mouse.y - this._player.y);
@@ -8332,8 +8331,8 @@ PlayState.prototype = $extend(flixel_FlxState.prototype,{
 		}
 		flixel_FlxG.overlap(this._bullets,this._enemies,$bind(this,this.onOverlap));
 		flixel_FlxG.overlap(this._player,this._enemies,null,flixel_FlxObject.separate);
-		var _this1 = flixel_FlxG.keys.pressed;
-		if(_this1.keyManager.checkStatus(27,_this1.status)) {
+		var _this = flixel_FlxG.keys.pressed;
+		if(_this.keyManager.checkStatus(27,_this.status)) {
 			var nextState = new MenuState();
 			if(flixel_FlxG.game._state.switchTo(nextState)) {
 				flixel_FlxG.game._requestedState = nextState;
@@ -69208,7 +69207,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 299305;
+	this.version = 113721;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = ["lime","utils","AssetCache"];
